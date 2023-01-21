@@ -16,48 +16,41 @@
 
 import Foundation
 
-// MARK: - ProductsTable
-
-/// Resource configuration
-public struct Resource: Codable {
-    /// Initialise a Resource configuration
-    ///
-    /// - Parameters:
-    ///   - type: Resource type
-    ///   - properties: Resource YAML properties
-    public init(type: String, properties: YAMLContent) {
-        self.type = type
-        self.properties = properties
-    }
-
-    /// Resource type
-    public let type: String
-    
-    /// Resource YAML properties
-    public let properties: YAMLContent
-
-    enum CodingKeys: String, CodingKey {
-        case type = "Type"
-        case properties = "Properties"
+public struct Resources {
+    /// Build Resources
+    /// - Parameter with: Resource dictionary
+    /// - Returns: [String: AnyHashable]
+    public static func resources(with dictionary: [String: [String: AnyHashable]]) -> [String: AnyHashable] {
+        return ["Resources": dictionary]
     }
 }
 
-extension Resource {
+/// Resource builder
+public struct Resource {
+    /// Build a Resource
+    ///
+    /// - Parameters:
+    ///   - type: Type
+    ///   - properties: Properties
+    /// - Returns: [String: AnyHashable]
+    public static func resource(type: String, properties: [String: AnyHashable]) -> [String: AnyHashable] {
+        return ["Type": type,
+                "Properties": properties]
+    }
+    
     /// Build a DynamoDB Resource with billing mode PAY_PER_REQUEST
     ///
     /// - Parameters:
     ///   - tableName: DynamoDB table name
     ///   - key: DynamoDB key
-    /// - Returns: Resource
-    public static func DynamoDBResorce(tableName: String, key: String) throws -> Resource {
-        return Resource(
+    /// - Returns: [String: AnyHashable]
+    public static func dynamoDBResource(tableName: String, key: String) -> [String: AnyHashable] {
+        return Resource.resource(
             type: "AWS::DynamoDB::Table",
-            properties: try YAMLContent.DynamoDBProperties(tableName: tableName, key: key)
+            properties: Resource.dynamoDBProperties(tableName: tableName, key: key)
         )
     }
-}
 
-extension YAMLContent {
     /// DynamoDB YAML properties
     ///
     /// Billing mode PAY_PER_REQUEST
@@ -65,9 +58,9 @@ extension YAMLContent {
     /// - Parameters:
     ///   - tableName: DynamoDB table name
     ///   - key: DynamoDB key name
-    /// - Returns: YAMLContent
-    public static func DynamoDBProperties(tableName: String, key: String) throws -> YAMLContent {
-        let properties: [String: AnyHashable] = [
+    /// - Returns: [String: AnyHashable]
+    public static func dynamoDBProperties(tableName: String, key: String) -> [String: AnyHashable] {
+        return [
             "TableName": tableName,
             "AttributeDefinitions": [
                 "AttributeName": key,
@@ -79,6 +72,5 @@ extension YAMLContent {
             ],
             "BillingMode": "PAY_PER_REQUEST"
         ]
-        return try YAMLContent(with: properties)
     }
 }

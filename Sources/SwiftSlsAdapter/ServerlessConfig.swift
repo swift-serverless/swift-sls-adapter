@@ -28,6 +28,7 @@ public struct ServerlessConfig: Codable, Equatable {
     ///
     /// - Parameters:
     ///   - service: Service Name
+    ///   - variablesResolutionMode: Variable resolution mode (default: 20210326)
     ///   - frameworkVersion: Framework Version
     ///   - configValidationMode: Configuration validation: 'error' (fatal error), 'warn' (logged to the output) or 'off' (default: warn)
     ///   - useDotenv: Load environment variables from .env files (default: false)
@@ -39,6 +40,7 @@ public struct ServerlessConfig: Codable, Equatable {
     ///   - resources: YAML Resources
     public init(
         service: String,
+        variablesResolutionMode: String = "20210326",
         frameworkVersion: String = "3",
         configValidationMode: ServerlessConfig.ValidationMode = .warn,
         useDotenv: Bool = false,
@@ -50,6 +52,7 @@ public struct ServerlessConfig: Codable, Equatable {
         resources: YAMLContent?
     ) {
         self.service = service
+        self.variablesResolutionMode = variablesResolutionMode
         self.frameworkVersion = frameworkVersion
         self.configValidationMode = configValidationMode
         self.useDotenv = useDotenv
@@ -63,6 +66,9 @@ public struct ServerlessConfig: Codable, Equatable {
 
     /// Service name
     public let service: String
+    
+    /// Variable Resolution Mode
+    public let variablesResolutionMode: String
 
     /// Framework version constraint (semver constraint): '3', '^2.33'
     public let frameworkVersion: String

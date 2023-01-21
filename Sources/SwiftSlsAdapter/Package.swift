@@ -29,7 +29,7 @@ public struct Package: Codable, Equatable {
     public init(
         patterns: [String]?,
         individually: Bool?,
-        artifact: String?
+        artifact: String? = nil
     ) {
         self.patterns = patterns
         self.individually = individually

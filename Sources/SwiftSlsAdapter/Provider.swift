@@ -48,23 +48,23 @@ public struct Provider: Codable, Equatable {
     ///   - iam: IAM permissions
     public init(
         name: Provider.CloudProvider,
-        stage: Provider.Stage,
+        stage: Provider.Stage? = nil,
         region: Region,
-        profile: String?,
-        tags: [String: String]?,
-        stackName: String?,
-        deploymentMethod: Provider.DeploymentMethod,
-        notificationArns: [String]?,
-        stackParameters: [Provider.StackParameters]?,
+        profile: String? = nil,
+        tags: [String: String]? = nil,
+        stackName: String? = nil,
+        deploymentMethod: Provider.DeploymentMethod = .changesets,
+        notificationArns: [String]? = nil,
+        stackParameters: [Provider.StackParameters]? = nil,
         disableRollback: Bool = false,
-        rollbackConfiguration: Provider.RollbackConfiguration?,
+        rollbackConfiguration: Provider.RollbackConfiguration? = nil,
         runtime: Runtime,
-        memorySize: Int?,
-        timeout: Int?,
+        memorySize: Int? = nil,
+        timeout: Int? = nil,
         environment: YAMLContent?,
-        logRetentionInDays: Int?,
-        logDataProtectionPolicy: YAMLContent?,
-        kmsKeyArn: String?,
+        logRetentionInDays: Int? = nil,
+        logDataProtectionPolicy: YAMLContent? = nil,
+        kmsKeyArn: String? = nil,
         lambdaHashingVersion: String,
         versionFunctions: Bool = true,
         architecture: Architecture,
@@ -102,7 +102,7 @@ public struct Provider: Codable, Equatable {
     public let name: CloudProvider
 
     /// Default stage (default: dev)
-    @CodableDefault.FirstCase public var stage: Stage
+    public var stage: Stage?
 
     /// Default region (default: us-east-1)
     @CodableDefault.FirstCase public var region: Region
@@ -316,13 +316,13 @@ extension Provider {
         ///   - cors: Enable CORS HTTP headers with default settings (allow all)
         ///   - authorizers: Authorizers
         public init(
-            id: String?,
-            name: String?,
+            id: String? = nil,
+            name: String? = nil,
             payload: String?,
-            disableDefaultEndpoint: Bool?,
-            metrics: Bool?,
+            disableDefaultEndpoint: Bool? = nil,
+            metrics: Bool? = nil,
             cors: Bool?,
-            authorizers: Provider.Authorizers?
+            authorizers: Provider.Authorizers? = nil
         ) {
             self.id = id
             self.name = name
@@ -440,12 +440,12 @@ public struct Role: Codable, Equatable {
     ///   - deploymentRole: ARN of an IAM role for CloudFormation service. If specified, CloudFormation uses the role's credentials
     public init(
         statements: [Statement],
-        name: String?,
-        path: String?,
-        managedPolicies: [String]?,
-        permissionsBoundary: String?,
-        tags: [String: String]?,
-        deploymentRole: String?
+        name: String? = nil,
+        path: String? = nil,
+        managedPolicies: [String]? = nil,
+        permissionsBoundary: String? = nil,
+        tags: [String: String]? = nil,
+        deploymentRole: String? = nil
     ) {
         self.statements = statements
         self.name = name
