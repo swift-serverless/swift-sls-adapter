@@ -12,16 +12,18 @@ This swift package allows Encoding and Decoding a serverless.yml using [Yams](ht
 
 
 ## Installation
----
+
 ### Swift Package Manager
 
 Add the following packages to your swift package
-```
-.package(url: "https://github.com/swift-sprinter/swift-sls-adapter.git", from: "0.1.0")
+```swift
+dependencies: [
+    // ...
+    .package(url: "https://github.com/swift-sprinter/swift-sls-adapter.git", from: "0.1.0")
+]
 ```
 
 ## Usage
----
 
 Decode:
 ```swift
@@ -157,7 +159,7 @@ let content = try encoder.encode(serverlessConfig)
 ```
 
 ## Supported Serverless Features
----
+
 The package is under development.
 
 Status of the features implemented in this package:
@@ -205,10 +207,9 @@ Status of the features implemented in this package:
 | AWS Resources                   | ✅ |
 
 ## Contributions
----
 
-Contributions are more than welcome! Follow this [guide](https://github.com/swift-sprinter/swift-sls-adapter/blob/master/CONTRIBUTING.md) to contribute.
+Contributions are more than welcome! Follow this [guide](https://github.com/swift-sprinter/swift-sls-adapter/blob/main/CONTRIBUTING.md) to contribute.
 
 ## References
----
+
 https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml
