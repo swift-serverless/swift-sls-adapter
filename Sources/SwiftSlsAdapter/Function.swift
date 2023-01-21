@@ -8,7 +8,8 @@
      http://www.apache.org/licenses/LICENSE-2.0
 
  Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
  */
@@ -17,8 +18,42 @@ import Foundation
 
 // MARK: - Function
 
-/// Function
+/// Function configuration
 public struct Function: Codable, Equatable {
+    /// Initialize a Lambda Function configuration
+    ///
+    /// - Parameters:
+    ///   - handler: The file and module for this specific function. Cannot be used with 'image'.
+    ///   - image: Container image to use. Cannot be used with 'handler'.
+    ///   - runtime: Custom Runtme for Swift: `.provided` or `.providedAl2`
+    ///   - memorySize: Default memory size for functions (default: 1024MB)
+    ///   - timeout: Default timeout for functions (default: 6 seconds)
+    ///   - environment: Function environment variables
+    ///   - ephemeralStorageSize: Configure the size of ephemeral storage available to your Lambda function (in MBs, default: 512)
+    ///   - name: Override the Lambda function name ${sls:stage}-lambdaName
+    ///   - description: Description
+    ///   - architecture: Processor architecture: `.x86_64` or `.arm64` via Graviton2 (default: x86_64)
+    ///   - reservedConcurrency: Reserve a maximum number of concurrent instances (default: account limit)
+    ///   - provisionedConcurrency: Provision a minimum number of concurrent instances (default: 0)
+    ///   - role: Override the IAM role to use for this function
+    ///   - onError: SNS topic or SQS ARN to use for the DeadLetterConfig (failed executions)
+    ///   - kmsKeyArn: KMS key ARN to use for encryption for this function
+    ///   - snapStart: Defines if you want to make use of SnapStart, this feature can only be used in combination with a Java runtime. Configuring this property will result in either None or PublishedVersions for the Lambda function
+    ///   - disableLogs: Disable the creation of the CloudWatch log group
+    ///   - logRetentionInDays: Duration for CloudWatch log retention (default: forever).
+    ///   - tags: Function specific tags
+    ///   - vpc: VPC settings for this function
+    ///   - url: Lambda URL definition for this function, optional
+    ///   - package: Packaging rules specific to this function
+    ///   - layers: ARN of Lambda layers to use
+    ///   - tracing: Overrides the provider setting. Can be 'Active' or 'PassThrough'
+    ///   - condition: Conditionally deploy the function
+    ///   - dependsOn: CloudFormation 'DependsOn' option
+    ///   - destinations: Lambda destination settings
+    ///   - fileSystemConfig: Mount an EFS filesystem
+    ///   - maximumRetryAttempts: Maximum retry attempts when an asynchronous invocation fails (between 0 and 2; default: 2)
+    ///   - maximumEventAge: Maximum event age in seconds when invoking asynchronously (between 60 and 21600)
+    ///   - events: Function Events
     public init(
         handler: String?,
         image: String? = nil,
@@ -193,13 +228,17 @@ public struct Function: Codable, Equatable {
     /// Maximum event age in seconds when invoking asynchronously (between 60 and 21600)
     public let maximumEventAge: Int?
 
+    /// Function Events
     public let events: [FunctionEvent]
 }
 
 // MARK: - FunctionEvent
 
-/// FunctionEvent
+/// FunctionEvent configuration
 public struct FunctionEvent: Codable, Equatable {
+    /// Initialize a FunctionEvent configuration
+    ///
+    /// - Parameter httpAPI: API Gateway v2 HTTP API event
     public init(httpAPI: EventHTTPAPI?) {
         self.httpAPI = httpAPI
     }
@@ -214,8 +253,14 @@ public struct FunctionEvent: Codable, Equatable {
 
 // MARK: - EventHTTPAPI
 
-/// EventHTTPAPI
+/// EventHTTPAPI configuration
 public struct EventHTTPAPI: Codable, Equatable {
+    /// Initialise an EventHTTP API configuration
+    ///
+    /// - Parameters:
+    ///   - path: URL path
+    ///   - method: HTTP metohd
+    ///   - authorizer: Authorizer
     public init(
         path: String,
         method: HTTPMethod,
@@ -226,7 +271,10 @@ public struct EventHTTPAPI: Codable, Equatable {
         self.authorizer = authorizer
     }
 
+    /// URL path
     public let path: String
+    
+    /// HTTP Method
     public let method: HTTPMethod
 
     /// Name of an authorizer defined in 'provider.httpApi.authorizers'
@@ -234,12 +282,20 @@ public struct EventHTTPAPI: Codable, Equatable {
     /// ```
     /// ["name": "someJwtAuthorizer",
     ///  "scopes": ["user.id", "user.email"]]
+    ///  ```
     public let authorizer: YAMLContent?
 }
 
 // MARK: - Layer
 
+/// Layer configuration
 public struct Layer: Codable, Equatable {
+    /// Initialise a Layer configuration
+    ///
+    /// - Parameters:
+    ///   - path: Path to layer contents on disk
+    ///   - name: Name
+    ///   - description: Description
     public init(
         path: String,
         name: String,
@@ -250,13 +306,19 @@ public struct Layer: Codable, Equatable {
         self.description = description
     }
 
+    /// Path to layer contents on disk
     public let path: String
+    
+    /// Name
     public let name: String
+    
+    /// Description
     public let description: String
 }
 
 // MARK: - Tracing
 
+/// Tracing
 public enum Tracing: String, Codable, Equatable {
     case active = "Active"
     case passThrough = "PassThrough"
@@ -264,6 +326,7 @@ public enum Tracing: String, Codable, Equatable {
 
 // MARK: - HTTPMethod
 
+/// HTTPMethod
 public enum HTTPMethod: String, Codable, Equatable {
     case `get`
     case post

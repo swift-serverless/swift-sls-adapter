@@ -8,7 +8,8 @@
      http://www.apache.org/licenses/LICENSE-2.0
 
  Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
  */
@@ -20,6 +21,9 @@ public protocol CodableDefaultSource: Equatable {
     static var defaultValue: Value { get }
 }
 
+/// CodableDefault
+///
+/// Set a Codable Default value
 public enum CodableDefault {}
 
 extension CodableDefault: Equatable {
@@ -88,10 +92,16 @@ public extension CodableDefault {
 }
 
 public extension CodableDefault {
+    /// Set Codable default to `true`
     typealias True = Wrapper<Sources.True>
+    /// Set Codable default to `false`
     typealias False = Wrapper<Sources.False>
+    /// Set Codable default to `""`
     typealias EmptyString = Wrapper<Sources.EmptyString>
+    /// Set Codable default to `[]`
     typealias EmptyList<T: List> = Wrapper<Sources.EmptyList<T>> where T: Equatable
+    /// Set Codable default to `[:]`
     typealias EmptyMap<T: Map> = Wrapper<Sources.EmptyMap<T>> where T: Equatable
+    /// Set Codable default to the `enum` first case
     typealias FirstCase<T: Codable> = Wrapper<Sources.FirstCase<T>> where T: CaseIterable, T: Equatable
 }

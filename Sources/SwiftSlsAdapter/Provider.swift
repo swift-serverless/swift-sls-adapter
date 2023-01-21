@@ -8,7 +8,8 @@
      http://www.apache.org/licenses/LICENSE-2.0
 
  Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
  */
@@ -17,7 +18,34 @@ import Foundation
 
 // MARK: - Provider
 
+/// Provider configuration
 public struct Provider: Codable, Equatable {
+    /// Initialise a Provider configuration
+    /// 
+    /// - Parameters:
+    ///   - name: Cloud provider name
+    ///   - stage: Default stage (default: dev)
+    ///   - region: Default region (default: us-east-1)
+    ///   - profile: The AWS profile to use to deploy (default: "default" profile)
+    ///   - tags: Optional CloudFormation tags to apply to APIs and functions
+    ///   - stackName: Use a custom name for the CloudFormation stack
+    ///   - deploymentMethod: Method used for CloudFormation deployments: 'changesets' or 'direct' (default: changesets)
+    ///   - notificationArns: List of existing Amazon SNS topics in the same region where notifications about stack events are sent.
+    ///   - stackParameters: Stack parameters
+    ///   - disableRollback: Disable automatic rollback by CloudFormation on failure. To be used for non-production environments.
+    ///   - rollbackConfiguration: Rollback configuration
+    ///   - runtime: Custom Runtme for Swift
+    ///   - memorySize: Default memory size for functions (default: 1024MB)
+    ///   - timeout: Default timeout for functions (default: 6 seconds)
+    ///   - environment: Function environment variables
+    ///   - logRetentionInDays: Duration for CloudWatch log retention (default: forever)
+    ///   - logDataProtectionPolicy: Policy defining how to monitor and mask sensitive data in CloudWatch logs
+    ///   - kmsKeyArn: KMS key ARN to use for encryption for all functions
+    ///   - lambdaHashingVersion: Version of hashing algorithm used by Serverless Framework for function packaging
+    ///   - versionFunctions: Use function versioning (enabled by default)
+    ///   - architecture: Processor architecture: `.x86_64` or `.arm64` via Graviton2 (default: x86_64)
+    ///   - httpAPI: API Gateway v2 HTTP API
+    ///   - iam: IAM permissions
     public init(
         name: Provider.CloudProvider,
         stage: Provider.Stage,
@@ -97,11 +125,13 @@ public struct Provider: Codable, Equatable {
     /// example: ["arn:aws:sns:us-east-1:XXXXXX:mytopic"]
     public let notificationArns: [String]?
 
+    /// Stack parameters
     public let stackParameters: [StackParameters]?
 
     /// Disable automatic rollback by CloudFormation on failure. To be used for non-production environments.
     @CodableDefault.False public var disableRollback
 
+    /// Rollback configuration
     public let rollbackConfiguration: RollbackConfiguration?
 
     // MARK: - General function settings
@@ -206,6 +236,11 @@ extension Provider {
 
     /// Stack Parameters
     public struct StackParameters: Codable, Equatable {
+        /// StackParameters configuration
+        ///
+        /// - Parameters:
+        ///   - parameterKey: parameter key
+        ///   - parameterValue: parameter value
         public init(parameterKey: String, parameterValue: String) {
             self.parameterKey = parameterKey
             self.parameterValue = parameterValue
@@ -222,12 +257,20 @@ extension Provider {
 
     /// Rollback Configuration
     public struct RollbackConfiguration: Codable, Equatable {
+        /// RollbackConfiguration
+        ///
+        /// - Parameters:
+        ///   - monitoringTimeInMinutes: Monitoring time in minutes
+        ///   - rollbackTriggers: Rollback triggers
         public init(monitoringTimeInMinutes: Int, rollbackTriggers: [Provider.RollbackTrigger]) {
             self.monitoringTimeInMinutes = monitoringTimeInMinutes
             self.rollbackTriggers = rollbackTriggers
         }
 
+        /// Monitoring time in minutes
         public let monitoringTimeInMinutes: Int
+        
+        /// Rollback triggers
         public let rollbackTriggers: [RollbackTrigger]
 
         enum CodingKeys: String, CodingKey {
@@ -238,12 +281,20 @@ extension Provider {
 
     /// Rollback Trigger
     public struct RollbackTrigger: Codable, Equatable {
+        /// RollbackTrigger configuration
+        ///
+        /// - Parameters:
+        ///   - arn: Trigger arn
+        ///   - type: Trigger type
         public init(arn: String, type: String) {
             self.arn = arn
             self.type = type
         }
 
+        /// Trigger arn
         public let arn: String
+        
+        /// Trigger type
         public let type: String
 
         enum CodingKeys: String, CodingKey {
@@ -254,6 +305,16 @@ extension Provider {
 
     /// ProviderHTTPAPI
     public struct ProviderHTTPAPI: Codable, Equatable {
+        /// Initialise ProviderHTTPAPI cofiguration
+        ///
+        /// - Parameters:
+        ///   - id: Attach to an externally created HTTP API via its ID
+        ///   - name: Set a custom name for the API Gateway API (default: ${sls:stage}-${self:service})
+        ///   - payload: Payload format version (note: use quotes in YAML: '1.0' or '2.0') (default: '2.0')
+        ///   - disableDefaultEndpoint: Disable the default 'execute-api' HTTP endpoint (default: false)
+        ///   - metrics: Enable detailed CloudWatch metrics (default: false)
+        ///   - cors: Enable CORS HTTP headers with default settings (allow all)
+        ///   - authorizers: Authorizers
         public init(
             id: String?,
             name: String?,
@@ -315,17 +376,24 @@ extension Provider {
 
 // MARK: - Iam
 
+/// Iam configuration
 public enum Iam: Codable, Equatable {
     /// Instruct Serverless to use an existing IAM role for all Lambda functions
     case existingRole(String)
 
     /// Configure the role that will be created by Serverless (simplest):
     case role(Role)
-
+    
+    /// Initialise Iam config
+    ///
+    /// - Parameter role: Configure the role that will be created by Serverless
     public init(role: String) {
         self = .existingRole(role)
     }
 
+    /// Initialise Iam config
+    ///
+    /// - Parameter role: Instruct Serverless to use an existing IAM role for all Lambda functions
     public init(role: Role) {
         self = .role(role)
     }
@@ -358,7 +426,18 @@ public enum Iam: Codable, Equatable {
 
 // MARK: - Role
 
+/// Role configuration
 public struct Role: Codable, Equatable {
+    /// Initialise Role configuration
+    ///
+    /// - Parameters:
+    ///   - statements: Statement list
+    ///   - name: Optional custom name for default IAM role
+    ///   - path: Optional custom path for default IAM role
+    ///   - managedPolicies: Optional IAM Managed Policies to include into the IAM Role
+    ///   - permissionsBoundary: ARN of a Permissions Boundary for the role
+    ///   - tags: CloudFormation tags
+    ///   - deploymentRole: ARN of an IAM role for CloudFormation service. If specified, CloudFormation uses the role's credentials
     public init(
         statements: [Statement],
         name: String?,
@@ -377,6 +456,7 @@ public struct Role: Codable, Equatable {
         self.deploymentRole = deploymentRole
     }
 
+    /// Statement list
     public let statements: [Statement]
 
     /// Optional custom name for default IAM role
@@ -400,7 +480,14 @@ public struct Role: Codable, Equatable {
 
 // MARK: - Statement
 
+/// Statement configuration
 public struct Statement: Codable, Equatable {
+    /// Initialise Statement
+    ///
+    /// - Parameters:
+    ///   - effect: effect
+    ///   - action: action
+    ///   - resource: resource YAML
     public init(
         effect: String,
         action: [String],
@@ -411,8 +498,11 @@ public struct Statement: Codable, Equatable {
         self.resource = resource
     }
 
+    /// effect
     public let effect: String
+    /// action
     public let action: [String]
+    /// resource YAML
     public let resource: YAMLContent
 
     enum CodingKeys: String, CodingKey {
@@ -430,6 +520,8 @@ public enum Runtime: String, Codable, Equatable {
 
 /// Architecture
 public enum Architecture: String, Codable, CaseIterable, Equatable {
+    ///CPU architecture x86_64 - Intel
     case x86_64
+    ///CPU architecture arm64 - Graviton 2
     case arm64
 }

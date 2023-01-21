@@ -8,7 +8,8 @@
      http://www.apache.org/licenses/LICENSE-2.0
 
  Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
  */
@@ -17,13 +18,22 @@ import Foundation
 
 // MARK: - ProductsTable
 
+/// Resource configuration
 public struct Resource: Codable {
+    /// Initialise a Resource configuration
+    ///
+    /// - Parameters:
+    ///   - type: Resource type
+    ///   - properties: Resource YAML properties
     public init(type: String, properties: YAMLContent) {
         self.type = type
         self.properties = properties
     }
 
+    /// Resource type
     public let type: String
+    
+    /// Resource YAML properties
     public let properties: YAMLContent
 
     enum CodingKeys: String, CodingKey {
@@ -33,6 +43,12 @@ public struct Resource: Codable {
 }
 
 extension Resource {
+    /// Build a DynamoDB Resource with billing mode PAY_PER_REQUEST
+    ///
+    /// - Parameters:
+    ///   - tableName: DynamoDB table name
+    ///   - key: DynamoDB key
+    /// - Returns: Resource
     public static func DynamoDBResorce(tableName: String, key: String) throws -> Resource {
         return Resource(
             type: "AWS::DynamoDB::Table",
@@ -42,6 +58,14 @@ extension Resource {
 }
 
 extension YAMLContent {
+    /// DynamoDB YAML properties
+    ///
+    /// Billing mode PAY_PER_REQUEST
+    /// see: https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_BillingModeSummary.html
+    /// - Parameters:
+    ///   - tableName: DynamoDB table name
+    ///   - key: DynamoDB key name
+    /// - Returns: YAMLContent
     public static func DynamoDBProperties(tableName: String, key: String) throws -> YAMLContent {
         let properties: [String: AnyHashable] = [
             "TableName": tableName,

@@ -8,7 +8,8 @@
      http://www.apache.org/licenses/LICENSE-2.0
 
  Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
  */
@@ -19,8 +20,9 @@ public typealias ARN = String
 
 // MARK: - ServerlessConfig
 
+/// ServerlessConfig configuration
 public struct ServerlessConfig: Codable, Equatable {
-    /// ServerlessConfig.init
+    /// Initialise a ServerlessConfig configuration
     ///
     /// Reference: https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml
     ///
@@ -31,10 +33,10 @@ public struct ServerlessConfig: Codable, Equatable {
     ///   - useDotenv: Load environment variables from .env files (default: false)
     ///   - provider: Cloud Provider
     ///   - package: Package
-    ///   - custom: Custom
+    ///   - custom: Custom YAML content
     ///   - layers: Layers
     ///   - functions: Functions
-    ///   - resources: Resources
+    ///   - resources: YAML Resources
     public init(
         service: String,
         frameworkVersion: String = "3",
@@ -78,13 +80,17 @@ public struct ServerlessConfig: Codable, Equatable {
 
     /// Optional deployment packaging configuration
     public let package: Package?
-
+    
+    /// Custom YAML content
     public let custom: YAMLContent?
-
+    
+    /// Layers
     public let layers: [String: Layer]?
 
+    /// Functions
     public let functions: [String: Function]?
 
+    /// YAML Resources
     public let resources: YAMLContent?
 }
 
