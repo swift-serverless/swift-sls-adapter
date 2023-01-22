@@ -66,7 +66,7 @@ public struct ServerlessConfig: Codable, Equatable {
 
     /// Service name
     public let service: String
-    
+
     /// Variable Resolution Mode
     public let variablesResolutionMode: String
 
@@ -86,10 +86,10 @@ public struct ServerlessConfig: Codable, Equatable {
 
     /// Optional deployment packaging configuration
     public let package: Package?
-    
+
     /// Custom YAML content
     public let custom: YAMLContent?
-    
+
     /// Layers
     public let layers: [String: Layer]?
 

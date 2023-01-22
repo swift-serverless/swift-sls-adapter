@@ -47,19 +47,29 @@ import Yams
 let iam = Iam(
     role: Role(
         statements: [
-            Statement(effect: "Allow",
-                      action: ["logs:CreateLogGroup",
-                               "logs:CreateLogStream",
-                               "logs:PutLogEvents"],
-                      resource: try YAMLContent(with: "*")),
-            Statement(effect: "Allow",
-                      action: ["dynamodb:UpdateItem",
-                               "dynamodb:PutItem",
-                               "dynamodb:GetItem",
-                               "dynamodb:DeleteItem",
-                               "dynamodb:Scan",
-                               "dynamodb:DescribeTable"],
-                      resource: try YAMLContent(with: [["Fn::GetAtt": ["ProductsTable", "Arn"]]]))]))
+            Statement(
+                effect: "Allow",
+                action: [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                ],
+                resource: try YAMLContent(with: "*")
+            ),
+            Statement(
+                effect: "Allow",
+                action: [
+                    "dynamodb:UpdateItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:GetItem",
+                    "dynamodb:DeleteItem",
+                    "dynamodb:Query",
+                    "dynamodb:Scan",
+                    "dynamodb:DescribeTable"
+                ],
+                resource: try YAMLContent(with: [["Fn::GetAtt": ["ProductsTable", "Arn"]]])
+            )
+        ]))
 let environment = try YAMLContent(with: ["PRODUCTS_TABLE_NAME": "${self:custom.tableName}"])
 let provider = Provider(
     name: .aws,
@@ -69,23 +79,27 @@ let provider = Provider(
     lambdaHashingVersion: "20201221",
     architecture: .arm64,
     httpAPI: .init(payload: "2.0", cors: true),
-    iam: iam)
+    iam: iam
+)
 let custom = try YAMLContent(with: ["tableName": "products-table-${sls:stage}"])
-let layer =  Layer(
+let layer = Layer(
     path: "./build/swift-lambda-runtime",
     name: "aws-swift-sprinter-lambda-runtime",
-    description: "AWS Lambda Custom Runtime for Swift-Sprinter")
+    description: "AWS Lambda Custom Runtime for Swift-Sprinter"
+)
 
 let package = Package(
-    patterns: [ "!**/*",
-                "build/Products"],
+    patterns: [
+        "!**/*",
+        "build/Products"
+    ],
     individually: true
 )
 
-let layersRef = try YAMLContent(with: [["Ref": ["SwiftDashlambdaDashruntimeLambdaLayer"]]])
+let layersRef = try YAMLContent(with: [["Ref": "SwiftDashlambdaDashruntimeLambdaLayer"]])
 
-let modelKey = "{sku}"
-let modelName = "products"
+let path = "/products"
+let keyedPath = "/products/{sku}"
 
 let createProduct = Function(
     handler: "build/Products.create",
@@ -94,7 +108,7 @@ let createProduct = Function(
     description: "[${sls:stage}] Create Product",
     package: package,
     layers: layersRef,
-    events: [.init(httpAPI: .init(path: "/\(modelName)", method: .post))]
+    events: [.init(httpAPI: .init(path: path, method: .post))]
 )
 
 let readProduct = Function(
@@ -104,7 +118,7 @@ let readProduct = Function(
     description: "[${sls:stage}] Get Product",
     package: package,
     layers: layersRef,
-    events: [.init(httpAPI: .init(path: "/\(modelName)/\(modelKey)", method: .get))]
+    events: [.init(httpAPI: .init(path: keyedPath, method: .get))]
 )
 
 let updateProduct = Function(
@@ -114,7 +128,7 @@ let updateProduct = Function(
     description: "[${sls:stage}] Update Product",
     package: package,
     layers: layersRef,
-    events: [.init(httpAPI: .init(path: "/\(modelName)", method: .put))]
+    events: [.init(httpAPI: .init(path: path, method: .put))]
 )
 
 let deleteProduct = Function(
@@ -124,21 +138,21 @@ let deleteProduct = Function(
     description: "[${sls:stage}] Delete Product",
     package: package,
     layers: layersRef,
-    events: [.init(httpAPI: .init(path: "/\(modelName)/\(modelKey)", method: .delete))]
+    events: [.init(httpAPI: .init(path: keyedPath, method: .delete))]
 )
 
 let listProducts = Function(
     handler: "build/Products.list",
     runtime: nil,
     memorySize: 256,
-    description: "[${sls:stage}] List Product",
+    description: "[${sls:stage}] List Products",
     package: package,
     layers: layersRef,
-    events: [.init(httpAPI: .init(path: "/\(modelName)/", method: .get))]
+    events: [.init(httpAPI: .init(path: path, method: .get))]
 )
 
-let resource = Resource.dynamoDBResource(tableName: "${self:custom.tableName}", key: modelKey)
-let resources = Resources.resources(with: ["ProductTable": resource])
+let resource = Resource.dynamoDBResource(tableName: "${self:custom.tableName}", key: "sku")
+let resources = Resources.resources(with: ["ProductsTable": resource])
 
 let serverlessConfig = ServerlessConfig(
     service: "swift-sprinter-rest-api",
@@ -146,11 +160,13 @@ let serverlessConfig = ServerlessConfig(
     package: .init(patterns: nil, individually: true, artifact: nil),
     custom: custom,
     layers: ["swift-lambda-runtime": layer],
-    functions: ["createProduct": createProduct,
-                "readProduct": readProduct,
-                "updateProduct": updateProduct,
-                "deleteProduct": deleteProduct,
-                "listProducts": listProducts],
+    functions: [
+        "createProduct": createProduct,
+        "readProduct": readProduct,
+        "updateProduct": updateProduct,
+        "deleteProduct": deleteProduct,
+        "listProducts": listProducts
+    ],
     resources: try YAMLContent(with: resources)
 )
 

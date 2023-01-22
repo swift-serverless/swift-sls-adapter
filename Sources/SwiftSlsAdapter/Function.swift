@@ -273,7 +273,7 @@ public struct EventHTTPAPI: Codable, Equatable {
 
     /// URL path
     public let path: String
-    
+
     /// HTTP Method
     public let method: HTTPMethod
 
@@ -308,10 +308,10 @@ public struct Layer: Codable, Equatable {
 
     /// Path to layer contents on disk
     public let path: String
-    
+
     /// Name
     public let name: String
-    
+
     /// Description
     public let description: String
 }

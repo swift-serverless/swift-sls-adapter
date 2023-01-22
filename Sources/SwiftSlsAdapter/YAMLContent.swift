@@ -17,7 +17,7 @@
 import Foundation
 
 /// YAML Content
-public enum YAMLContent: Hashable, Equatable {
+public enum YAMLContent: Hashable {
     case `nil`
     case bool(Bool)
     case int(Int)
@@ -186,6 +186,44 @@ extension YAMLContent: Codable {
             try container.encode(array)
         case .dictionary(let dictionary):
             try container.encode(dictionary)
+        }
+    }
+}
+
+extension YAMLContent: Equatable {
+    public static func == (lhs: YAMLContent, rhs: YAMLContent) -> Bool {
+        switch (lhs, rhs) {
+        case (.array(let arrL), .array(let arrR)):
+            return Set(arrL) == Set(arrR)
+        case (.dictionary(let dictL), .dictionary(let dictR)):
+            guard dictL.keys.count == dictR.keys.count else {
+                return false
+            }
+            guard Set(dictL.keys) == Set(dictR.keys) else {
+                return false
+            }
+            for (key, value) in dictL {
+                if dictR[key] != value {
+                    return false
+                }
+            }
+            return true
+        case (.string(let strL), .string(let strR)):
+            return strL == strR
+        case (.double(let dubL), .double(let dubR)):
+            return dubL == dubR
+        case (.double(let dubL), .int(let intR)):
+            return dubL == Double(intR)
+        case (.int(let intL), .int(let intR)):
+            return intL == intR
+        case (.int(let intL), .double(let dubR)):
+            return Double(intL) == dubR
+        case (.bool(let bL), .bool(let bR)):
+            return bL == bR
+        case (.nil, .nil):
+            return true
+        default:
+            return false
         }
     }
 }

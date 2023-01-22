@@ -21,7 +21,7 @@ import Foundation
 /// Provider configuration
 public struct Provider: Codable, Equatable {
     /// Initialise a Provider configuration
-    /// 
+    ///
     /// - Parameters:
     ///   - name: Cloud provider name
     ///   - stage: Default stage (default: dev)
@@ -53,7 +53,7 @@ public struct Provider: Codable, Equatable {
         profile: String? = nil,
         tags: [String: String]? = nil,
         stackName: String? = nil,
-        deploymentMethod: Provider.DeploymentMethod = .changesets,
+        deploymentMethod: Provider.DeploymentMethod? = nil,
         notificationArns: [String]? = nil,
         stackParameters: [Provider.StackParameters]? = nil,
         disableRollback: Bool = false,
@@ -118,7 +118,7 @@ public struct Provider: Codable, Equatable {
 
     /// Method used for CloudFormation deployments: 'changesets' or 'direct' (default: changesets)
     /// See https://www.serverless.com/framework/docs/providers/aws/guide/deploying#deployment-method
-    @CodableDefault.FirstCase public var deploymentMethod: DeploymentMethod
+    public var deploymentMethod: DeploymentMethod?
 
     /// List of existing Amazon SNS topics in the same region where notifications about stack events are sent.
     ///
@@ -269,7 +269,7 @@ extension Provider {
 
         /// Monitoring time in minutes
         public let monitoringTimeInMinutes: Int
-        
+
         /// Rollback triggers
         public let rollbackTriggers: [RollbackTrigger]
 
@@ -293,7 +293,7 @@ extension Provider {
 
         /// Trigger arn
         public let arn: String
-        
+
         /// Trigger type
         public let type: String
 
@@ -383,7 +383,7 @@ public enum Iam: Codable, Equatable {
 
     /// Configure the role that will be created by Serverless (simplest):
     case role(Role)
-    
+
     /// Initialise Iam config
     ///
     /// - Parameter role: Configure the role that will be created by Serverless
@@ -520,8 +520,8 @@ public enum Runtime: String, Codable, Equatable {
 
 /// Architecture
 public enum Architecture: String, Codable, CaseIterable, Equatable {
-    ///CPU architecture x86_64 - Intel
+    /// CPU architecture x86_64 - Intel
     case x86_64
-    ///CPU architecture arm64 - Graviton 2
+    /// CPU architecture arm64 - Graviton 2
     case arm64
 }

@@ -16,7 +16,7 @@
 
 import Foundation
 
-public struct Resources {
+public enum Resources {
     /// Build Resources
     /// - Parameter with: Resource dictionary
     /// - Returns: [String: AnyHashable]
@@ -26,7 +26,7 @@ public struct Resources {
 }
 
 /// Resource builder
-public struct Resource {
+public enum Resource {
     /// Build a Resource
     ///
     /// - Parameters:
@@ -34,10 +34,12 @@ public struct Resource {
     ///   - properties: Properties
     /// - Returns: [String: AnyHashable]
     public static func resource(type: String, properties: [String: AnyHashable]) -> [String: AnyHashable] {
-        return ["Type": type,
-                "Properties": properties]
+        return [
+            "Type": type,
+            "Properties": properties
+        ]
     }
-    
+
     /// Build a DynamoDB Resource with billing mode PAY_PER_REQUEST
     ///
     /// - Parameters:
@@ -63,12 +65,16 @@ public struct Resource {
         return [
             "TableName": tableName,
             "AttributeDefinitions": [
-                "AttributeName": key,
-                "AttributeType": "S"
+                [
+                    "AttributeName": key,
+                    "AttributeType": "S"
+                ]
             ],
             "KeySchema": [
-                ["AttributeName": key],
-                ["KeyType": "HASH"]
+                [
+                    "AttributeName": key,
+                    "KeyType": "HASH"
+                ]
             ],
             "BillingMode": "PAY_PER_REQUEST"
         ]
