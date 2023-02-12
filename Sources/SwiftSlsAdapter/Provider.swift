@@ -525,3 +525,33 @@ public enum Architecture: String, Codable, CaseIterable, Equatable {
     /// CPU architecture arm64 - Graviton 2
     case arm64
 }
+
+public extension Statement {
+    static func allowLogAccess(resource: YAMLContent) -> Statement {
+        Statement(
+            effect: "Allow",
+            action: [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            resource: resource
+        )
+    }
+    
+    static func allowDynamoDBReadWrite(resource: YAMLContent) -> Statement {
+        Statement(
+            effect: "Allow",
+            action: [
+                "dynamodb:UpdateItem",
+                "dynamodb:PutItem",
+                "dynamodb:GetItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:DescribeTable"
+            ],
+            resource: resource
+        )
+    }
+}

@@ -1,5 +1,4 @@
 service: swift-sprinter-rest-api
-variablesResolutionMode: 20210326
 frameworkVersion: '3'
 configValidationMode: warn
 
@@ -50,7 +49,7 @@ layers:
         description: AWS Lambda Custom Runtime for Swift-Sprinter
 
 functions:
-    createProduct:
+    createProducts:
         handler: build/Products.create
         package:
             individually: true
@@ -60,12 +59,12 @@ functions:
         memorySize: 256
         layers:
            - { Ref: "SwiftDashlambdaDashruntimeLambdaLayer" }
-        description: "[${sls:stage}] Create Product"
+        description: "[${sls:stage}] post /products"
         events:
             - httpApi:
                 path: /products
                 method: post
-    readProduct:
+    readProducts:
         handler: build/Products.read
         package:
             individually: true
@@ -75,12 +74,12 @@ functions:
         memorySize: 256
         layers:
             - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
-        description: "[${sls:stage}] Get Product"
+        description: "[${sls:stage}] get /products/{sku}"
         events:
             - httpApi:
                 path: /products/{sku}
                 method: get
-    updateProduct:
+    updateProducts:
         handler: build/Products.update
         package:
             individually: true
@@ -90,12 +89,12 @@ functions:
         memorySize: 256
         layers:
             - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
-        description: "[${sls:stage}] Update Product"
+        description: "[${sls:stage}] put /products"
         events:
             - httpApi:
                 path: /products
                 method: put
-    deleteProduct:
+    deleteProducts:
         handler: build/Products.delete
         package:
             individually: true
@@ -105,7 +104,7 @@ functions:
         memorySize: 256
         layers:
             - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
-        description: "[${sls:stage}] Delete Product"
+        description: "[${sls:stage}] delete /products/{sku}"
         events:
             - httpApi:
                 path: /products/{sku}
@@ -120,7 +119,7 @@ functions:
         memorySize: 256
         layers:
             - { Ref: SwiftDashlambdaDashruntimeLambdaLayer }
-        description: "[${sls:stage}] List Products"
+        description: "[${sls:stage}] get /products"
         events:
             - httpApi:
                 path: /products
