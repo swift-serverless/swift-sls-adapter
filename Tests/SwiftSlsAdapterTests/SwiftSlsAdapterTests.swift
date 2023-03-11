@@ -43,7 +43,8 @@ final class SwiftSlsAdapterTests: XCTestCase {
         
         XCTAssertEqual(serverlessConfig.package?.individually, true)
         
-        XCTAssertEqual(serverlessConfig.custom?.value, ["tableName": "products-table-${sls:stage}"])
+        XCTAssertEqual(serverlessConfig.custom?.value, ["tableName": "products-table-${sls:stage}",
+                                                        "keyName": "sku"])
         
         let provider = serverlessConfig.provider
         XCTAssertEqual(provider.name, .aws)
@@ -54,10 +55,10 @@ final class SwiftSlsAdapterTests: XCTestCase {
         XCTAssertEqual(httpAPI.cors, true)
         
         XCTAssertEqual(provider.runtime, .providedAl2)
-        XCTAssertEqual(provider.lambdaHashingVersion, "20201221")
         XCTAssertEqual(provider.architecture, .arm64)
         
-        XCTAssertEqual(provider.environment?.value, ["PRODUCTS_TABLE_NAME": "${self:custom.tableName}"])
+        XCTAssertEqual(provider.environment?.value, ["DYNAMO_DB_TABLE_NAME": "${self:custom.tableName}",
+                                                     "DYNAMO_DB_KEY": "${self:custom.keyName}"])
         
         let iam = try XCTUnwrap(provider.iam)
         
@@ -156,8 +157,8 @@ final class SwiftSlsAdapterTests: XCTestCase {
         XCTAssertEqual(productTableType.string, "AWS::DynamoDB::Table")
         let productTableProperties = try XCTUnwrap(productTable.dictionary?["Properties"])
         XCTAssertEqual(productTableProperties.dictionary?["TableName"]?.string, "${self:custom.tableName}")
-        XCTAssertEqual(productTableProperties.dictionary?["AttributeDefinitions"]?.value, [["AttributeName": "sku", "AttributeType": "S"]])
-        XCTAssertEqual(productTableProperties.dictionary?["KeySchema"]?.value, [["AttributeName": "sku", "KeyType": "HASH"]])
+        XCTAssertEqual(productTableProperties.dictionary?["AttributeDefinitions"]?.value, [["AttributeName": "${self:custom.keyName}", "AttributeType": "S"]])
+        XCTAssertEqual(productTableProperties.dictionary?["KeySchema"]?.value, [["AttributeName": "${self:custom.keyName}", "KeyType": "HASH"]])
         XCTAssertEqual(productTableProperties.dictionary?["BillingMode"]?.string, "PAY_PER_REQUEST")
     }
     
@@ -184,11 +185,14 @@ final class SwiftSlsAdapterTests: XCTestCase {
         let serverlessConfig2 = try decoder.decode(ServerlessConfig.self, from: serverlessYml)
         
         let service = "swift-sprinter-rest-api"
+        
         let dynamoDBKey = "sku"
         let dynamoDBTableNamePrefix = "products"
+        
         let region: Region = .eu_west_1
         let runtime: Runtime = .providedAl2
         let architecture: Architecture = .arm64
+        let memorySize: Int = 256
         let path = "/products"
         let keyedPath = "/products/{\(dynamoDBKey)}"
         let executable = "Products"
@@ -197,7 +201,8 @@ final class SwiftSlsAdapterTests: XCTestCase {
         let layerDescription = "AWS Lambda Custom Runtime for Swift-Sprinter"
         let layerPath = "./build/swift-lambda-runtime"
         
-        let environmentTableName = "PRODUCTS_TABLE_NAME"
+        let environmentTableName = "DYNAMO_DB_TABLE_NAME"
+        let environmentKeyName = "DYNAMO_DB_KEY"
         let dynamoResourceName = "ProductsTable"
         
         // Initialise ServerlessConfig
@@ -207,18 +212,19 @@ final class SwiftSlsAdapterTests: XCTestCase {
                              .allowDynamoDBReadWrite(resource: try YAMLContent(with: [["Fn::GetAtt": [dynamoResourceName, "Arn"]]]))]
             )
         )
-        let environment = try YAMLContent(with: [environmentTableName: "${self:custom.tableName}"])
+        let environment = try YAMLContent(with: [environmentTableName: "${self:custom.tableName}",
+                                                   environmentKeyName: "${self:custom.keyName}"])
         let provider = Provider(
             name: .aws,
             region: region,
             runtime: runtime,
             environment: environment,
-            lambdaHashingVersion: "20201221",
             architecture: architecture,
             httpAPI: .init(payload: "2.0", cors: true),
             iam: iam
         )
-        let custom = try YAMLContent(with: ["tableName": "\(dynamoDBTableNamePrefix)-table-${sls:stage}"])
+        let custom = try YAMLContent(with: ["tableName": "\(dynamoDBTableNamePrefix)-table-${sls:stage}",
+                                            "keyName": dynamoDBKey])
         let layer = Layer(
             path: layerPath,
             name: layerName,
@@ -246,7 +252,7 @@ final class SwiftSlsAdapterTests: XCTestCase {
             let function = try Function.httpApiLambda(
                 handler: "\(buildPath)/\(executable).\(endpoint.handler)",
                 description: nil,
-                memorySize: 256,
+                memorySize: memorySize,
                 runtime: nil,
                 package: package,
                 layerName: layerKey,
@@ -255,7 +261,7 @@ final class SwiftSlsAdapterTests: XCTestCase {
             functions["\(endpoint.handler)\(executable)"] = function
         }
         
-        let resource = Resource.dynamoDBResource(tableName: "${self:custom.tableName}", key: dynamoDBKey)
+        let resource = Resource.dynamoDBResource(tableName: "${self:custom.tableName}", key: "${self:custom.keyName}")
         let resources = Resources.resources(with: [dynamoResourceName: resource])
         
         let serverlessConfig = ServerlessConfig(

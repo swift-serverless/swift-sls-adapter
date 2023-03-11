@@ -41,7 +41,6 @@ public struct Provider: Codable, Equatable {
     ///   - logRetentionInDays: Duration for CloudWatch log retention (default: forever)
     ///   - logDataProtectionPolicy: Policy defining how to monitor and mask sensitive data in CloudWatch logs
     ///   - kmsKeyArn: KMS key ARN to use for encryption for all functions
-    ///   - lambdaHashingVersion: Version of hashing algorithm used by Serverless Framework for function packaging
     ///   - versionFunctions: Use function versioning (enabled by default)
     ///   - architecture: Processor architecture: `.x86_64` or `.arm64` via Graviton2 (default: x86_64)
     ///   - httpAPI: API Gateway v2 HTTP API
@@ -65,7 +64,6 @@ public struct Provider: Codable, Equatable {
         logRetentionInDays: Int? = nil,
         logDataProtectionPolicy: YAMLContent? = nil,
         kmsKeyArn: String? = nil,
-        lambdaHashingVersion: String,
         versionFunctions: Bool = true,
         architecture: Architecture,
         httpAPI: Provider.ProviderHTTPAPI?,
@@ -88,7 +86,6 @@ public struct Provider: Codable, Equatable {
         self.logRetentionInDays = logRetentionInDays
         self.logDataProtectionPolicy = logDataProtectionPolicy
         self.kmsKeyArn = kmsKeyArn
-        self.lambdaHashingVersion = lambdaHashingVersion
         self.architecture = architecture
         self.httpAPI = httpAPI
         self.iam = iam
@@ -165,9 +162,6 @@ public struct Provider: Codable, Equatable {
     /// KMS key ARN to use for encryption for all functions
     public let kmsKeyArn: String?
 
-    /// Version of hashing algorithm used by Serverless Framework for function packaging
-    public let lambdaHashingVersion: String
-
     /// Use function versioning (enabled by default)
     @CodableDefault.True public var versionFunctions
 
@@ -203,7 +197,6 @@ extension Provider {
         case memorySize
         case timeout
         case httpAPI = "httpApi"
-        case lambdaHashingVersion
         case architecture
         case environment
         case logRetentionInDays
