@@ -8,8 +8,8 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
-            name: "SwiftSlsAdapter",
-            targets: ["SwiftSlsAdapter"]
+            name: "SLSAdapter",
+            targets: ["SLSAdapter"]
         ),
     ],
     dependencies: [
@@ -21,15 +21,15 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
-            name: "SwiftSlsAdapter",
+            name: "SLSAdapter",
             dependencies: [
                 .product(name: "Yams", package: "Yams")
             ]
         ),
         .testTarget(
-            name: "SwiftSlsAdapterTests",
+            name: "SLSAdapterTests",
             dependencies: [
-                "SwiftSlsAdapter",
+                "SLSAdapter",
                 .product(name: "Yams", package: "Yams")
             ],
             resources: [.copy("Fixtures")]

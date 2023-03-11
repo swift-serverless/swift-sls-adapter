@@ -15,7 +15,7 @@
  */
 
 import Foundation
-import SwiftSlsAdapter
+import SLSAdapter
 import XCTest
 import Yams
 
