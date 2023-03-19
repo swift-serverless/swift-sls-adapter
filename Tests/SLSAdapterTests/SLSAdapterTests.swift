@@ -168,7 +168,7 @@ final class SwiftSlsAdapterTests: XCTestCase {
         let serverlessConfig = try decoder.decode(ServerlessConfig.self, from: serverlessYml)
         let encoder = YAMLEncoder()
         let content = try encoder.encode(serverlessConfig)
-        let data = try XCTUnwrap(Data(content.utf8))
+        let data = try XCTUnwrap(content.data(using: .utf8))
         let serverlessConfig2 = try decoder.decode(ServerlessConfig.self, from: data)
         XCTAssertEqual(serverlessConfig, serverlessConfig2)
     }
@@ -183,95 +183,21 @@ final class SwiftSlsAdapterTests: XCTestCase {
         let decoder = YAMLDecoder()
         let serverlessYml = try fixture(name: "serverless", type: "yml")
         let serverlessConfig2 = try decoder.decode(ServerlessConfig.self, from: serverlessYml)
-        
-        let service = "swift-sprinter-rest-api"
-        
-        let dynamoDBKey = "sku"
-        let dynamoDBTableNamePrefix = "products"
-        
-        let region: Region = .eu_west_1
-        let runtime: Runtime = .providedAl2
-        let architecture: Architecture = .arm64
-        let memorySize: Int = 256
-        let path = "/products"
-        let keyedPath = "/products/{\(dynamoDBKey)}"
-        let executable = "Products"
-        let buildPath = "build"
-        let layerName = "aws-swift-sprinter-lambda-runtime"
-        let layerDescription = "AWS Lambda Custom Runtime for Swift-Sprinter"
-        let layerPath = "./build/swift-lambda-runtime"
-        
-        let environmentTableName = "DYNAMO_DB_TABLE_NAME"
-        let environmentKeyName = "DYNAMO_DB_KEY"
-        let dynamoResourceName = "ProductsTable"
-        
-        // Initialise ServerlessConfig
-        let iam = Iam(
-            role: Role(
-                statements: [.allowLogAccess(resource: try YAMLContent(with: "*")),
-                             .allowDynamoDBReadWrite(resource: try YAMLContent(with: [["Fn::GetAtt": [dynamoResourceName, "Arn"]]]))]
-            )
-        )
-        let environment = try YAMLContent(with: [environmentTableName: "${self:custom.tableName}",
-                                                   environmentKeyName: "${self:custom.keyName}"])
-        let provider = Provider(
-            name: .aws,
-            region: region,
-            runtime: runtime,
-            environment: environment,
-            architecture: architecture,
-            httpAPI: .init(payload: "2.0", cors: true),
-            iam: iam
-        )
-        let custom = try YAMLContent(with: ["tableName": "\(dynamoDBTableNamePrefix)-table-${sls:stage}",
-                                            "keyName": dynamoDBKey])
-        let layer = Layer(
-            path: layerPath,
-            name: layerName,
-            description: layerDescription
-        )
-        
-        let package = Package(
-            patterns: [
-                "!**/*",
-                "\(buildPath)/\(executable)"
-            ],
-            individually: true
-        )
-        
-        let endpoints = [
-            Endpoint(handler: "create", method: .post, path: path),
-            Endpoint(handler: "read", method: .get, path: keyedPath),
-            Endpoint(handler: "update", method: .put, path: path),
-            Endpoint(handler: "delete", method: .delete, path: keyedPath),
-            Endpoint(handler: "list", method: .get, path: path)
-        ]
-        let layerKey = "swift-lambda-runtime"
-        var functions: [String: Function] = [:]
-        for endpoint in endpoints {
-            let function = try Function.httpApiLambda(
-                handler: "\(buildPath)/\(executable).\(endpoint.handler)",
-                description: nil,
-                memorySize: memorySize,
-                runtime: nil,
-                package: package,
-                layerName: layerKey,
-                event: .init(path: endpoint.path, method: endpoint.method)
-            )
-            functions["\(endpoint.handler)\(executable)"] = function
-        }
-        
-        let resource = Resource.dynamoDBResource(tableName: "${self:custom.tableName}", key: "${self:custom.keyName}")
-        let resources = Resources.resources(with: [dynamoResourceName: resource])
-        
-        let serverlessConfig = ServerlessConfig(
-            service: service,
-            provider: provider,
-            package: .init(patterns: nil, individually: true, artifact: nil),
-            custom: custom,
-            layers: [layerKey: layer],
-            functions: functions,
-            resources: try YAMLContent(with: resources)
+       
+        let serverlessConfig = try ServerlessConfig.dynamoDBLambdaAPIWithLayer(
+            service: "swift-sprinter-rest-api",
+            dynamoDBKey: "sku",
+            dynamoDBTableNamePrefix: "products",
+            httpAPIPath: "/products",
+            region: .eu_west_1,
+            runtime: .providedAl2,
+            architecture: .arm64,
+            memorySize: 256,
+            executable: "Products",
+            layerName: "aws-swift-sprinter-lambda-runtime",
+            layerDescription: "AWS Lambda Custom Runtime for Swift-Sprinter",
+            layerPath: "./build/swift-lambda-runtime",
+            buildPath: "build"
         )
         
         XCTAssertEqual(serverlessConfig.service, serverlessConfig2.service)
@@ -286,6 +212,38 @@ final class SwiftSlsAdapterTests: XCTestCase {
         XCTAssertEqual(serverlessConfig.functions?["listProducts"], serverlessConfig2.functions?["listProducts"])
         XCTAssertEqual(serverlessConfig.custom, serverlessConfig2.custom)
         XCTAssertEqual(serverlessConfig.package, serverlessConfig2.package)
+        XCTAssertEqual(serverlessConfig.resources, serverlessConfig2.resources)
+    }
+    
+    func testInitServerlessNolLayerYml() throws {
+        let decoder = YAMLDecoder()
+        let serverlessYml = try fixture(name: "serverless_no_layer", type: "yml")
+        let serverlessConfig2 = try decoder.decode(ServerlessConfig.self, from: serverlessYml)
+        
+        let serverlessConfig = try ServerlessConfig.dynamoDBLambdaAPI(
+            service: "swift-sprinter-rest-api",
+            dynamoDBKey: "sku",
+            dynamoDBTableNamePrefix: "products",
+            httpAPIPath: "/products",
+            region: .eu_west_1,
+            runtime: .providedAl2,
+            architecture: .arm64,
+            memorySize: 256,
+            executable: "Products",
+            artifact: "build/Products/Products.zip"
+        )
+        
+        XCTAssertEqual(serverlessConfig.service, serverlessConfig2.service)
+        XCTAssertEqual(serverlessConfig.provider, serverlessConfig2.provider)
+        XCTAssertEqual(serverlessConfig.provider.iam, serverlessConfig2.provider.iam)
+        XCTAssertEqual(serverlessConfig.custom, serverlessConfig2.custom)
+        XCTAssertEqual(serverlessConfig.package, serverlessConfig2.package)
+        XCTAssertEqual(serverlessConfig.functions?["createProducts"], serverlessConfig2.functions?["createProducts"])
+        XCTAssertEqual(serverlessConfig.functions?["readProducts"], serverlessConfig2.functions?["readProducts"])
+        XCTAssertEqual(serverlessConfig.functions?["updateProducts"], serverlessConfig2.functions?["updateProducts"])
+        XCTAssertEqual(serverlessConfig.functions?["deleteProducts"], serverlessConfig2.functions?["deleteProducts"])
+        XCTAssertEqual(serverlessConfig.functions?["listProducts"], serverlessConfig2.functions?["listProducts"])
+        XCTAssertEqual(serverlessConfig.custom, serverlessConfig2.custom)
         XCTAssertEqual(serverlessConfig.resources, serverlessConfig2.resources)
     }
 }

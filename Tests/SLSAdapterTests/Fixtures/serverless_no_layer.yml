@@ -1,0 +1,100 @@
+service: swift-sprinter-rest-api
+frameworkVersion: '3'
+configValidationMode: warn
+
+package:
+    artifact: build/Products/Products.zip
+
+custom:
+    tableName: 'products-table-${sls:stage}'
+    keyName: 'sku'
+
+provider:
+    name: aws
+    region: eu-west-1
+    httpApi:
+        payload: '2.0'
+        cors: true
+    # Use provided.al2 if you build with M1, provided if you build with x86_64
+    runtime: provided.al2
+    # Use arm64 if you build with M1, or x86_64 if you build with intel
+    architecture: arm64
+    environment:
+        DYNAMO_DB_TABLE_NAME: '${self:custom.tableName}'
+        DYNAMO_DB_KEY: '${self:custom.keyName}'
+    iam:
+        role:
+            statements:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: "*"
+                - Effect: Allow
+                  Action:
+                    - dynamodb:UpdateItem
+                    - dynamodb:PutItem
+                    - dynamodb:GetItem
+                    - dynamodb:DeleteItem
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                    - dynamodb:DescribeTable
+                  Resource:
+                    - { Fn::GetAtt: [ProductsTable, Arn] }
+
+functions:
+    createProducts:
+        handler: create
+        memorySize: 256
+        description: "[${sls:stage}] post /products"
+        events:
+            - httpApi:
+                path: /products
+                method: post
+    readProducts:
+        handler: read
+        memorySize: 256
+        description: "[${sls:stage}] get /products/{sku}"
+        events:
+            - httpApi:
+                path: /products/{sku}
+                method: get
+    updateProducts:
+        handler: update
+        memorySize: 256
+        description: "[${sls:stage}] put /products"
+        events:
+            - httpApi:
+                path: /products
+                method: put
+    deleteProducts:
+        handler: delete
+        memorySize: 256
+        description: "[${sls:stage}] delete /products/{sku}"
+        events:
+            - httpApi:
+                path: /products/{sku}
+                method: delete
+    listProducts:
+        handler: list
+        memorySize: 256
+        description: "[${sls:stage}] get /products"
+        events:
+            - httpApi:
+                path: /products
+                method: get
+
+resources:
+    Resources:
+        ProductsTable:
+            Type: AWS::DynamoDB::Table
+            Properties:
+                TableName: ${self:custom.tableName}
+                AttributeDefinitions:
+                    - AttributeName: ${self:custom.keyName}
+                      AttributeType: S
+                KeySchema:
+                    - AttributeName: ${self:custom.keyName}
+                      KeyType: HASH
+                BillingMode: PAY_PER_REQUEST
