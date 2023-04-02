@@ -1,6 +1,5 @@
 # swift-sls-adapter
-
-[![Swift 5.7](https://img.shields.io/badge/Swift-5.7-orange.svg)](https://swift.org/download/) 
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fswift-sprinter%2Fswift-sls-adapter%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/swift-sprinter/swift-sls-adapter) [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fswift-sprinter%2Fswift-sls-adapter%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/swift-sprinter/swift-sls-adapter) 
 [![Dist](https://github.com/swift-sprinter/swift-sls-adapter/actions/workflows/swift-test.yml/badge.svg)](https://github.com/swift-sprinter/swift-sls-adapter/actions/workflows/swift-test.yml)
 
 Swift serverless.yml adapter. Read and Write a Serverless Framework configuration in Swift.
