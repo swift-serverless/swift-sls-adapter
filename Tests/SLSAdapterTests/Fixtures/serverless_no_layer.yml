@@ -15,6 +15,23 @@ provider:
     httpApi:
         payload: '2.0'
         cors: true
+        authorizers:
+            JWTAuthorizer:
+                type: jwt
+                identitySource: $request.header.Authorization
+                issuerUrl: "https://appleid.apple.com"
+                audience:
+                    - com.mydomain.myhost
+            customAuthorizer:
+                name: "LambdaAuthorizer"
+                type: request
+                functionName: lambdaAuthorizer
+                payloadVersion: '2.0'
+                identitySource:
+                    - $request.header.SEC-X-API-KEY
+                    - $request.header.User-Agent
+                resultTtlInSeconds: 0
+                enableSimpleResponses: true
     # Use provided.al2 if you build with M1, provided if you build with x86_64
     runtime: provided.al2
     # Use arm64 if you build with M1, or x86_64 if you build with intel

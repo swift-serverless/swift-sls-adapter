@@ -21,6 +21,34 @@ public extension YAMLContent {
         let layerInternalName =  layerName.prefix(1).capitalized + layerName.dropFirst(1).replacingOccurrences(of: "-", with: "Dash").appending("LambdaLayer")
         return try YAMLContent(with: [["Ref": layerInternalName]])
     }
+    
+    static func buildJWTAuthorizer(identitySource: String = "$request.header.Authorization",
+                                   issuerUrl: String,
+                                   audience: [String]) -> YAMLContent {
+        return .dictionary(
+            ["type": .string("jwt"),
+             "identitySource": .string(identitySource),
+             "issuerUrl": .string(issuerUrl),
+             "audience": .array(audience.compactMap { .string($0)} )])
+    }
+    
+    static func buildCustomAuthorizer(name: String,
+                                      type: String = "request",
+                                      functionName: String,
+                                      payloadVersion: String = "2.0",
+                                      identitySource: [String],
+                                      resultTtlInSeconds: Int = 0,
+                                      enableSimpleResponses: Bool = true) -> YAMLContent {
+        return .dictionary(
+            ["name": .string(name),
+             "type": .string(type),
+             "functionName": .string(functionName),
+             "payloadVersion": .string(payloadVersion),
+             "identitySource": .array(identitySource.compactMap { .string($0) }),
+             "resultTtlInSeconds": .string("\(resultTtlInSeconds)"),
+             "enableSimpleResponses": .string("\(enableSimpleResponses)")
+            ])
+    }
 }
 
 public extension Function {

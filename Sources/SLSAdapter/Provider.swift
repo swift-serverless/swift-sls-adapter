@@ -315,7 +315,7 @@ extension Provider {
             disableDefaultEndpoint: Bool? = nil,
             metrics: Bool? = nil,
             cors: Bool?,
-            authorizers: Provider.Authorizers? = nil
+            authorizers: YAMLContent? = nil
         ) {
             self.id = id
             self.name = name
@@ -347,23 +347,7 @@ extension Provider {
         public let cors: Bool?
 
         /// Authorizers
-        public let authorizers: Authorizers?
-    }
-
-    /// Authorizers
-    public struct Authorizers: Codable, Equatable {
-        /// JWT API authorizer
-        public let someJwtAuthorizer: JwtAuthorizer?
-
-        /// CustomLambdaAuthorizer
-        let someCustomLambdaAuthorizer: YAMLContent?
-    }
-
-    /// JwtAuthorizer
-    public struct JwtAuthorizer: Codable, Equatable {
-        public let identitySource: String
-        public let issuerUrl: String
-        public let audience: [String]
+        public let authorizers: YAMLContent?
     }
 }
 

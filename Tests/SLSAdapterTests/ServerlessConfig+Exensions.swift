@@ -149,7 +149,19 @@ extension ServerlessConfig {
                 runtime: runtime,
                 environment: environment,
                 architecture: architecture,
-                httpAPI: .init(payload: "2.0", cors: true),
+                httpAPI: .init(
+                    payload: "2.0",
+                    cors: true,
+                    authorizers:
+                        .dictionary([
+                            "JWTAuthorizer": .buildJWTAuthorizer(issuerUrl: "https://appleid.apple.com",
+                                                                                audience: ["com.mydomain.myhost"]),
+                            "customAuthorizer": .buildCustomAuthorizer(name: "LambdaAuthorizer",
+                                                                       functionName: "lambdaAuthorizer",
+                                                                       identitySource: ["$request.header.SEC-X-API-KEY",
+                                                                                        "$request.header.User-Agent"])
+                        ])
+                ),
                 iam: iam
             )
             let custom = try YAMLContent(with: ["tableName": "\(dynamoDBTableNamePrefix)-table-${sls:stage}",
