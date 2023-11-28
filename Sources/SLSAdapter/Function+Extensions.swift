@@ -91,4 +91,25 @@ public extension Function {
             events: [.init(httpAPI: event)]
         )
     }
+    
+    static func httpApiLambda(
+        handler: String,
+        description: String?,
+        memorySize: Int?,
+        environment: YAMLContent?,
+        runtime: Runtime?,
+        package: Package?,
+        event: EventHTTPAPI
+    ) throws -> Function {
+        Function(
+            handler: handler,
+            runtime: runtime,
+            memorySize: memorySize,
+            environment: environment,
+            description: description ?? "[${sls:stage}] \(event.method) \(event.path)",
+            package: package,
+            layers: nil,
+            events: [.init(httpAPI: event)]
+        )
+    }
 }
