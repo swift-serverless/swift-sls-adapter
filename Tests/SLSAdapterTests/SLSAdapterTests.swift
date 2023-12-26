@@ -31,7 +31,7 @@ final class SwiftSlsAdapterTests: XCTestCase {
         return try Data(contentsOf: fixtureUrl)
     }
     
-    func testReadServerlessYml() throws {
+    func test_ReadServerlessYml() throws {
         let serverlessYml = try fixture(name: "serverless", type: "yml")
         
         let decoder = YAMLDecoder()
@@ -162,7 +162,7 @@ final class SwiftSlsAdapterTests: XCTestCase {
         XCTAssertEqual(productTableProperties.dictionary?["BillingMode"]?.string, "PAY_PER_REQUEST")
     }
     
-    func testReadWriteServerlessYml() throws {
+    func test_ReadWriteServerlessYml() throws {
         let serverlessYml = try fixture(name: "serverless", type: "yml")
         let decoder = YAMLDecoder()
         let serverlessConfig = try decoder.decode(ServerlessConfig.self, from: serverlessYml)
@@ -179,7 +179,7 @@ final class SwiftSlsAdapterTests: XCTestCase {
         let path: String
     }
     
-    func testInitServerlessYml() throws {
+    func test_InitServerlessYml() throws {
         let decoder = YAMLDecoder()
         let serverlessYml = try fixture(name: "serverless", type: "yml")
         let serverlessConfig2 = try decoder.decode(ServerlessConfig.self, from: serverlessYml)
@@ -215,7 +215,7 @@ final class SwiftSlsAdapterTests: XCTestCase {
         XCTAssertEqual(serverlessConfig.resources, serverlessConfig2.resources)
     }
     
-    func testInitServerlessNolLayerYml() throws {
+    func test_InitServerlessNolLayerYml() throws {
         let decoder = YAMLDecoder()
         let serverlessYml = try fixture(name: "serverless_no_layer", type: "yml")
         let serverlessConfig2 = try decoder.decode(ServerlessConfig.self, from: serverlessYml)

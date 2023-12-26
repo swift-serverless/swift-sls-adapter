@@ -129,75 +129,110 @@ extension ServerlessConfig {
         executable: String,
         artifact: String
     ) throws -> ServerlessConfig {
-            let keyedPath = "\(httpAPIPath)/{\(dynamoDBKey)}"
-            let dynamoResourceName = "\(executable)Table"
-            
-            let environmentTableName = "DYNAMO_DB_TABLE_NAME"
-            let environmentKeyName = "DYNAMO_DB_KEY"
-
-            let iam = Iam(
-                role: Role(
-                    statements: [.allowLogAccess(resource: try YAMLContent(with: "*")),
-                                 .allowDynamoDBReadWrite(resource: try YAMLContent(with: [["Fn::GetAtt": [dynamoResourceName, "Arn"]]]))]
-                )
+        let keyedPath = "\(httpAPIPath)/{\(dynamoDBKey)}"
+        let dynamoResourceName = "\(executable)Table"
+        
+        let environmentTableName = "DYNAMO_DB_TABLE_NAME"
+        let environmentKeyName = "DYNAMO_DB_KEY"
+        let dynamoResource = try YAMLContent(with: [["Fn::GetAtt": [dynamoResourceName, "Arn"]]])
+        let iam = Iam(
+            role: Role(
+                statements: [.allowLogAccess(resource: try YAMLContent(with: "*")),
+                             .allowDynamoDBReadWrite(resource: dynamoResource)]
             )
-            let environment = try YAMLContent(with: [environmentTableName: "${self:custom.tableName}",
-                                                       environmentKeyName: "${self:custom.keyName}"])
-            let provider = Provider(
-                name: .aws,
-                region: region,
-                runtime: runtime,
-                environment: environment,
-                architecture: architecture,
-                httpAPI: .init(
-                    payload: "2.0",
-                    cors: true,
-                    authorizers:
+        )
+        let environment = try YAMLContent(with: [environmentTableName: "${self:custom.tableName}",
+                                                   environmentKeyName: "${self:custom.keyName}"])
+        let provider = Provider(
+            name: .aws,
+            region: region,
+            runtime: runtime,
+            environment: environment,
+            architecture: architecture,
+            httpAPI: .init(
+                payload: "2.0",
+                cors: true,
+                authorizers:
                         .dictionary([
                             "JWTAuthorizer": .buildJWTAuthorizer(issuerUrl: "https://appleid.apple.com",
-                                                                                audience: ["com.mydomain.myhost"]),
+                                                                 audience: ["com.mydomain.myhost"]),
                             "customAuthorizer": .buildCustomAuthorizer(name: "LambdaAuthorizer",
                                                                        functionName: "lambdaAuthorizer",
                                                                        identitySource: ["$request.header.SEC-X-API-KEY",
                                                                                         "$request.header.User-Agent"])
                         ])
-                ),
-                iam: iam
+            ),
+            iam: iam
+        )
+        let custom = try YAMLContent(with: ["tableName": "\(dynamoDBTableNamePrefix)-table-${sls:stage}",
+                                            "keyName": dynamoDBKey])
+        
+        let endpoints = [
+            Endpoint(handler: "create", method: .post, path: httpAPIPath),
+            Endpoint(handler: "read", method: .get, path: keyedPath),
+            Endpoint(handler: "update", method: .put, path: httpAPIPath),
+            Endpoint(handler: "delete", method: .delete, path: keyedPath),
+            Endpoint(handler: "list", method: .get, path: httpAPIPath)
+        ]
+        var functions: [String: Function] = [:]
+        for endpoint in endpoints {
+            let function = try Function.httpApiLambda(
+                handler: "\(endpoint.handler)",
+                description: nil,
+                memorySize: memorySize,
+                runtime: nil,
+                package: nil,
+                event: .init(path: endpoint.path, method: endpoint.method)
             )
-            let custom = try YAMLContent(with: ["tableName": "\(dynamoDBTableNamePrefix)-table-${sls:stage}",
-                                                "keyName": dynamoDBKey])
-            
-            let endpoints = [
-                Endpoint(handler: "create", method: .post, path: httpAPIPath),
-                Endpoint(handler: "read", method: .get, path: keyedPath),
-                Endpoint(handler: "update", method: .put, path: httpAPIPath),
-                Endpoint(handler: "delete", method: .delete, path: keyedPath),
-                Endpoint(handler: "list", method: .get, path: httpAPIPath)
-            ]
-            var functions: [String: Function] = [:]
-            for endpoint in endpoints {
-                let function = try Function.httpApiLambda(
-                    handler: "\(endpoint.handler)",
-                    description: nil,
-                    memorySize: memorySize,
-                    runtime: nil,
-                    package: nil,
-                    event: .init(path: endpoint.path, method: endpoint.method)
-                )
-                functions["\(endpoint.handler)\(executable)"] = function
-            }
-            
-            let resource = Resource.dynamoDBResource(tableName: "${self:custom.tableName}", key: "${self:custom.keyName}")
-            let resources = Resources.resources(with: [dynamoResourceName: resource])
-            
-            return ServerlessConfig(
-                service: service,
-                provider: provider,
-                package: .init(patterns: nil, individually: nil, artifact: artifact),
-                custom: custom,
-                layers: nil,
-                functions: functions,
-                resources: try YAMLContent(with: resources)
-            )
+            functions["\(endpoint.handler)\(executable)"] = function
         }
+        
+        let resource = Resource.dynamoDBResource(tableName: "${self:custom.tableName}", key: "${self:custom.keyName}")
+        let resources = Resources.resources(with: [dynamoResourceName: resource])
+        
+        return ServerlessConfig(
+            service: service,
+            provider: provider,
+            package: .init(patterns: nil, individually: nil, artifact: artifact),
+            custom: custom,
+            layers: nil,
+            functions: functions,
+            resources: try YAMLContent(with: resources)
+        )
+    }
+    
+    static func webhookLambdaAPI(
+        service: String,
+        region: Region,
+        runtime: Runtime,
+        architecture: Architecture,
+        memorySize: Int,
+        lambdasParams: [HttpAPILambdaParams]
+    ) throws -> ServerlessConfig {
+        let iam = Iam(
+            role: Role(
+                statements: [.allowLogAccess(resource: try YAMLContent(with: "*"))]
+            )
+        )
+        let provider = Provider(
+            name: .aws,
+            region: region,
+            runtime: runtime,
+            environment: nil,
+            architecture: architecture,
+            httpAPI: .init(payload: "2.0", cors: false),
+            iam: iam
+        )
+        let package = Package(patterns: nil, individually: true)
+        let functions = try lambdasParams.buildFunctions(memorySize: memorySize)
+        return ServerlessConfig(
+            service: service,
+            provider: provider,
+            package: package,
+            custom: nil,
+            layers: nil,
+            functions: functions,
+            resources: nil
+        )
+    }
 }
