@@ -203,57 +203,32 @@ extension ServerlessConfig {
     
     static func webhookLambdaAPI(
         service: String,
-        httpAPIPath: String,
         region: Region,
         runtime: Runtime,
         architecture: Architecture,
         memorySize: Int,
-        executable: String,
-        artifact: String
+        lambdasParams: [HttpAPILambdaParams]
     ) throws -> ServerlessConfig {
         let iam = Iam(
             role: Role(
                 statements: [.allowLogAccess(resource: try YAMLContent(with: "*"))]
             )
         )
-        let environment = try YAMLContent(with: ["WEBHOOK_SECRET": "${ssm:/dev/swift-webhook/webhook_secret}"])
         let provider = Provider(
             name: .aws,
             region: region,
             runtime: runtime,
-            environment: environment,
+            environment: nil,
             architecture: architecture,
-            httpAPI: .init(
-                payload: "2.0",
-                cors: false
-            ),
+            httpAPI: .init(payload: "2.0", cors: false),
             iam: iam
         )
-        let endpoints = [
-            Endpoint(handler: "postWebHook", method: .post, path: "/webhook"),
-            Endpoint(handler: "getWebHook", method: .get, path: "/webhook"),
-            Endpoint(handler: "githubWebHook", method: .post, path: "/github-webhook")
-        ]
-        var functions: [String: Function] = [:]
-        for endpoint in endpoints {
-            let function = try Function.httpApiLambda(
-                handler: "\(endpoint.handler)",
-                description: nil,
-                memorySize: memorySize,
-                environment: environment,
-                runtime: nil,
-                package: .init(patterns: nil,
-                               individually: nil,
-                               artifact: "build/GitHubWebHook/GitHubWebHook.zip"),
-                event: .init(path: endpoint.path, method: endpoint.method)
-            )
-            functions["\(endpoint.handler)\(executable)"] = function
-        }
-        
+        let package = Package(patterns: nil, individually: true)
+        let functions = try lambdasParams.buildFunctions(memorySize: memorySize)
         return ServerlessConfig(
             service: service,
             provider: provider,
-            package: .init(patterns: nil, individually: nil, artifact: artifact),
+            package: package,
             custom: nil,
             layers: nil,
             functions: functions,

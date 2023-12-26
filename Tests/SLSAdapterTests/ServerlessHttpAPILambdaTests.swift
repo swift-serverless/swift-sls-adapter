@@ -32,7 +32,7 @@ final class ServerlessHttpAPILambdaTests: XCTestCase {
         return try Data(contentsOf: fixtureUrl)
     }
 
-    func testReadServerlessWebhook() throws {
+    func test_ReadServerlessWebhook() throws {
         let serverlessYml = try fixture(name: "serverless_webhook", type: "yml")
         
         let decoder = YAMLDecoder()
@@ -97,7 +97,7 @@ final class ServerlessHttpAPILambdaTests: XCTestCase {
         let githubWebHook = try XCTUnwrap(serverlessConfig.functions?["githubWebHook"])
         XCTAssertEqual(githubWebHook.handler, "github-webhook")
         XCTAssertEqual(githubWebHook.memorySize, 256)
-        XCTAssertEqual(githubWebHook.description, "[${sls:stage}] get /github-webhook")
+        XCTAssertEqual(githubWebHook.description, "[${sls:stage}] post /github-webhook")
         let artifact3 = githubWebHook.package?.artifact
         XCTAssertEqual(artifact3, "build/GitHubWebHook/GitHubWebHook.zip")
         let environment = githubWebHook.environment?.dictionary
@@ -107,7 +107,7 @@ final class ServerlessHttpAPILambdaTests: XCTestCase {
         XCTAssertEqual(githubWebHook.events.first?.httpAPI?.method, .post)
     }
     
-    func testWriteServerlessWebook() throws {
+    func test_WriteServerlessWebook() throws {
         let serverlessYml = try fixture(name: "serverless_webhook", type: "yml")
         let decoder = YAMLDecoder()
         let serverlessConfig = try decoder.decode(ServerlessConfig.self, from: serverlessYml)
@@ -115,6 +115,53 @@ final class ServerlessHttpAPILambdaTests: XCTestCase {
         let content = try encoder.encode(serverlessConfig)
         let data = try XCTUnwrap(content.data(using: .utf8))
         let serverlessConfig2 = try decoder.decode(ServerlessConfig.self, from: data)
+        XCTAssertEqual(serverlessConfig, serverlessConfig2)
+    }
+    
+    func test_InitServerlessYml() throws {
+        let decoder = YAMLDecoder()
+        let serverlessYml = try fixture(name: "serverless_webhook", type: "yml")
+        let serverlessConfig2 = try decoder.decode(ServerlessConfig.self, from: serverlessYml)
+        
+        let service: String = "swift-webhook"
+        let region: Region = .us_east_1
+        let runtime: Runtime = .providedAl2
+        let architecture: Architecture = .arm64
+        let memorySize: Int = 256
+        
+        let lambdasParams: [HttpAPILambdaParams] = [
+            HttpAPILambdaParams(
+                name: "postWebHook",
+                handler: "post-webhook",
+                event: .init(path: "/webhook", method: .post),
+                environment: nil,
+                artifact: "build/WebHook/WebHook.zip"
+            ),
+            HttpAPILambdaParams(
+                name: "getWebHook",
+                handler: "get-webhook",
+                event: .init(path: "/webhook", method: .get),
+                environment: nil,
+                artifact: "build/WebHook/WebHook.zip"
+            ),
+            HttpAPILambdaParams(
+                name: "githubWebHook",
+                handler: "github-webhook",
+                event: .init(path: "/github-webhook", method: .post),
+                environment: YAMLContent.dictionary(
+                    ["WEBHOOK_SECRET": .string("${ssm:/dev/swift-webhook/webhook_secret}")]
+                ),
+                artifact: "build/GitHubWebHook/GitHubWebHook.zip"
+            )
+        ]
+        let serverlessConfig = try ServerlessConfig.webhookLambdaAPI(
+            service: service,
+            region: region,
+            runtime: runtime,
+            architecture: architecture,
+            memorySize: memorySize,
+            lambdasParams: lambdasParams
+        )
         XCTAssertEqual(serverlessConfig, serverlessConfig2)
     }
 }

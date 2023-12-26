@@ -48,7 +48,7 @@ functions:
   githubWebHook:
     handler: github-webhook
     memorySize: 256
-    description: '[${sls:stage}] get /github-webhook'
+    description: '[${sls:stage}] post /github-webhook'
     package:
       artifact: build/GitHubWebHook/GitHubWebHook.zip
     environment:
