@@ -1,7 +1,7 @@
 SWIFT_DOCKER_IMAGE = swift:5.10-jammy
 MOUNT_ROOT=$(shell pwd)
 SWIFT_BIN_PATH = $(shell swift build --show-bin-path)
-TEST_PACKAGE= $(SWIFT_BIN_PATH)/SwiftSlsAdapterTestsPackageTests.xctest
+TEST_PACKAGE= $(SWIFT_BIN_PATH)/swift-sls-adapterPackageTests.xctest
 BUILD_TEMP = .build/temp
 
 docker_bash:
