@@ -13,6 +13,9 @@ docker_bash:
 		$(SWIFT_DOCKER_IMAGE) \
 		/bin/bash
 
+test:
+	swift test --enable-code-coverage
+
 coverage:
 	llvm-cov export $(TEST_PACKAGE) \
 		--instr-profile=$(SWIFT_BIN_PATH)/codecov/default.profdata \
