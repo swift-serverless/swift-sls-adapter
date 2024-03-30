@@ -11,8 +11,6 @@ jobs:
   swift-tests:
     name: 'Swift Tests'
     runs-on: ubuntu-latest
-    container: swift:5.10-jammy
-  
      # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
@@ -23,8 +21,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      # Run tests with Thread Sanitizer https://www.swift.org/blog/tsan-support-on-linux/
-      - name: Run tests with Thread Sanitizer
+      # Set up Swift
+      - uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "5.10"
+      - name: Get swift version
+        run: swift --version
+
+      # Run tests
+      - name: Run tests
         run: swift test
       - name: Coverage
         run: |
