@@ -1,5 +1,5 @@
 /*
- Copyright 2023 (c) Andrea Scuderi - https://github.com/swift-sprinter
+ Copyright 2023 (c) Andrea Scuderi - https://github.com/swift-serverless
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ final class SwiftSlsAdapterTests: XCTestCase {
         
         let decoder = YAMLDecoder()
         let serverlessConfig = try decoder.decode(ServerlessConfig.self, from: serverlessYml)
-        XCTAssertEqual(serverlessConfig.service, "swift-sprinter-rest-api")
+        XCTAssertEqual(serverlessConfig.service, "swift-serverless-rest-api")
         XCTAssertEqual(serverlessConfig.frameworkVersion, "3")
         XCTAssertEqual(serverlessConfig.configValidationMode, .warn)
         XCTAssertEqual(serverlessConfig.useDotenv, false)
@@ -96,8 +96,8 @@ final class SwiftSlsAdapterTests: XCTestCase {
         let layer = try XCTUnwrap(serverlessConfig.layers?["swift-lambda-runtime"])
         
         XCTAssertEqual(layer.path, "./build/swift-lambda-runtime")
-        XCTAssertEqual(layer.name, "aws-swift-sprinter-lambda-runtime")
-        XCTAssertEqual(layer.description, "AWS Lambda Custom Runtime for Swift-Sprinter")
+        XCTAssertEqual(layer.name, "aws-swift-serverless-lambda-runtime")
+        XCTAssertEqual(layer.description, "AWS Lambda Custom Runtime for swift-serverless")
         
         let patternsExpectation = ["!**/*", "build/Products"]
         
@@ -185,7 +185,7 @@ final class SwiftSlsAdapterTests: XCTestCase {
         let serverlessConfig2 = try decoder.decode(ServerlessConfig.self, from: serverlessYml)
        
         let serverlessConfig = try ServerlessConfig.dynamoDBLambdaAPIWithLayer(
-            service: "swift-sprinter-rest-api",
+            service: "swift-serverless-rest-api",
             dynamoDBKey: "sku",
             dynamoDBTableNamePrefix: "products",
             httpAPIPath: "/products",
@@ -194,8 +194,8 @@ final class SwiftSlsAdapterTests: XCTestCase {
             architecture: .arm64,
             memorySize: 256,
             executable: "Products",
-            layerName: "aws-swift-sprinter-lambda-runtime",
-            layerDescription: "AWS Lambda Custom Runtime for Swift-Sprinter",
+            layerName: "aws-swift-serverless-lambda-runtime",
+            layerDescription: "AWS Lambda Custom Runtime for swift-serverless",
             layerPath: "./build/swift-lambda-runtime",
             buildPath: "build"
         )
@@ -221,7 +221,7 @@ final class SwiftSlsAdapterTests: XCTestCase {
         let serverlessConfig2 = try decoder.decode(ServerlessConfig.self, from: serverlessYml)
         
         let serverlessConfig = try ServerlessConfig.dynamoDBLambdaAPI(
-            service: "swift-sprinter-rest-api",
+            service: "swift-serverless-rest-api",
             dynamoDBKey: "sku",
             dynamoDBTableNamePrefix: "products",
             httpAPIPath: "/products",

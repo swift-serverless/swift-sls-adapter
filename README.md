@@ -1,6 +1,7 @@
 # swift-sls-adapter
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fswift-sprinter%2Fswift-sls-adapter%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/swift-sprinter/swift-sls-adapter) [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fswift-sprinter%2Fswift-sls-adapter%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/swift-sprinter/swift-sls-adapter) 
-[![Dist](https://github.com/swift-sprinter/swift-sls-adapter/actions/workflows/swift-test.yml/badge.svg)](https://github.com/swift-sprinter/swift-sls-adapter/actions/workflows/swift-test.yml)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fswift-serverless%2Fswift-sls-adapter%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/swift-serverless/swift-sls-adapter) [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fswift-serverless%2Fswift-sls-adapter%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/swift-serverless/swift-sls-adapter) [![Swift test](https://github.com/swift-serverless/swift-sls-adapter/actions/workflows/swift-test.yml/badge.svg)](https://github.com/swift-serverless/swift-sls-adapter/actions/workflows/swift-test.yml) [![security status](https://www.meterian.io/badge/gh/swift-serverless/swift-sls-adapter/security?branch=main)](https://www.meterian.io/report/gh/swift-serverless/swift-sls-adapter)
+[![stability status](https://www.meterian.io/badge/gh/swift-serverless/swift-sls-adapter/stability?branch=main)](https://www.meterian.io/report/gh/swift-serverless/swift-sls-adapter)
+[![licensing status](https://www.meterian.io/badge/gh/swift-serverless/swift-sls-adapter/licensing?branch=main)](https://www.meterian.io/report/gh/swift-serverless/swift-sls-adapter)
 
 Swift serverless.yml adapter. Read and Write a Serverless Framework configuration in Swift.
 
@@ -18,7 +19,7 @@ Add the following packages to your swift package
 ```swift
 dependencies: [
     // ...
-    .package(url: "https://github.com/swift-sprinter/swift-sls-adapter.git", from: "0.1.0")
+    .package(url: "https://github.com/swift-serverless/swift-sls-adapter.git", from: "0.1.0")
 ]
 ```
 
@@ -83,8 +84,8 @@ let provider = Provider(
 let custom = try YAMLContent(with: ["tableName": "products-table-${sls:stage}"])
 let layer = Layer(
     path: "./build/swift-lambda-runtime",
-    name: "aws-swift-sprinter-lambda-runtime",
-    description: "AWS Lambda Custom Runtime for Swift-Sprinter"
+    name: "aws-swift-serverless-lambda-runtime",
+    description: "AWS Lambda Custom Runtime for swift-serverless"
 )
 
 let package = Package(
@@ -154,7 +155,7 @@ let resource = Resource.dynamoDBResource(tableName: "${self:custom.tableName}", 
 let resources = Resources.resources(with: ["ProductsTable": resource])
 
 let serverlessConfig = ServerlessConfig(
-    service: "swift-sprinter-rest-api",
+    service: "swift-serverless-rest-api",
     provider: provider,
     package: .init(patterns: nil, individually: true, artifact: nil),
     custom: custom,
@@ -223,7 +224,7 @@ Status of the features implemented in this package:
 
 ## Contributions
 
-Contributions are more than welcome! Follow this [guide](https://github.com/swift-sprinter/swift-sls-adapter/blob/main/CONTRIBUTING.md) to contribute.
+Contributions are more than welcome! Follow this [guide](https://github.com/swift-serverless/swift-sls-adapter/blob/main/CONTRIBUTING.md) to contribute.
 
 ## References
 

@@ -1,4 +1,4 @@
-service: swift-sprinter-rest-api
+service: swift-serverless-rest-api
 frameworkVersion: '3'
 configValidationMode: warn
 

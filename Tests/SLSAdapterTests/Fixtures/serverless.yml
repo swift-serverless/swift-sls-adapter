@@ -1,4 +1,4 @@
-service: swift-sprinter-rest-api
+service: swift-serverless-rest-api
 frameworkVersion: '3'
 configValidationMode: warn
 
@@ -46,8 +46,8 @@ provider:
 layers:
     swift-lambda-runtime:
         path: ./build/swift-lambda-runtime
-        name: aws-swift-sprinter-lambda-runtime
-        description: AWS Lambda Custom Runtime for Swift-Sprinter
+        name: aws-swift-serverless-lambda-runtime
+        description: AWS Lambda Custom Runtime for swift-serverless
 
 functions:
     createProducts:
