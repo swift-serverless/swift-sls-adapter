@@ -11,7 +11,7 @@ jobs:
   swift-tests:
     name: 'Swift Tests'
     runs-on: ubuntu-latest
-    container: swift:5.7-jammy
+    container: swift:5.10-jammy
   
      # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
@@ -25,4 +25,11 @@ jobs:
 
       # Run tests with Thread Sanitizer https://www.swift.org/blog/tsan-support-on-linux/
       - name: Run tests with Thread Sanitizer
-        run: swift test --sanitize=thread
+        run: swift test
+      - name: Coverage
+        run: |
+          make coverage
+      - name: Upload Code Coverage 
+        uses: codecov/codecov-action@v3
+        with:
+          files: ${{ github.workspace }}/lcov.info

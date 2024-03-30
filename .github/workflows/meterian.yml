@@ -1,0 +1,25 @@
+# .github/workflows/meterian.yml
+
+name: Meterian Scanner workflow
+
+on: push
+
+jobs:
+    meterian_scan:
+        name: Meterian client scan
+        runs-on: ubuntu-latest
+        steps:
+          - uses: swift-actions/setup-swift@v2
+            with:
+              swift-version: "5.7.3"
+          - name: Get swift version
+            run: swift --version
+          - name: Checkout
+            uses: actions/checkout@v3
+          - name: Generate Package.resolved
+            run: swift package resolve
+          - name: Meterian Scanner
+            uses: MeterianHQ/meterian-github-action@v1.0.17
+            with:
+              oss: true
+              cli_args: --tags=swift 
